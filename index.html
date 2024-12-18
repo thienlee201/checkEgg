@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievement Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .achievement {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .highlight {
+            background-color: #75ccdf;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100px;
+            max-height: 100px;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Achievement Data</h1>
+    <textarea id="data-input" placeholder="Paste your JSON data here"></textarea>
+    <button onclick="loadData()">Load Data</button>
+    <div id="summary">
+        <p><strong>Owned Count:</strong> <span id="owned-count"></span></p>
+        <p><strong>Total Count:</strong> <span id="total-count"></span></p>
+        <p><strong>Special:</strong> <span id="special-count"></span></p>
+    </div>
+    <h2>User Achievements</h2>
+    <div id="achievements"></div>
+
+    <script>
+        function loadData() {
+            const inputData = document.getElementById('data-input').value;
+            try {
+                const data = JSON.parse(inputData);
+
+                // Populate summary
+                document.getElementById('owned-count').textContent = data.owned_count;
+                document.getElementById('total-count').textContent = data.total_count;
+
+                // Calculate special count
+                const specialCount = data.user_achievements.filter(achievement => achievement.user_ranking < 501).length;
+                document.getElementById('special-count').textContent = specialCount;
+
+                // Populate achievements
+                const achievementsContainer = document.getElementById('achievements');
+                achievementsContainer.innerHTML = ''; // Clear previous data
+
+                data.user_achievements.forEach(achievement => {
+                    const achievementDiv = document.createElement('div');
+                    achievementDiv.className = 'achievement';
+                    if (achievement.user_ranking < 501) {
+                        achievementDiv.classList.add('highlight');
+                    }
+                    achievementDiv.innerHTML = `
+                        <h3>${achievement.name}</h3>
+                        <p>${achievement.description}</p>
+                        <p><strong>User Ranking:</strong> ${achievement.user_ranking}</p>
+                        ${achievement.medias && achievement.medias[0] && achievement.medias[0].url ? `<img src="${achievement.medias[0].url}" alt="${achievement.name}">` : ''}
+                    `;
+                    achievementsContainer.appendChild(achievementDiv);
+                });
+            } catch (error) {
+                alert('Invalid JSON data. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
